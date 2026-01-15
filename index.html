@@ -2,35 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cross Stitch Frame Fit</title>
+  <title>Cross Stitch Frame Fit Calculator</title>
+
   <style>
     body {
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       padding: 24px;
-      max-width: 600px;
+      max-width: 720px;
+      margin: auto;
     }
+
+    h2 {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: inline-block;
+      margin-right: 16px;
+      margin-bottom: 12px;
+    }
+
     input {
-      width: 80px;
-      margin: 0 8px 8px 0;
+      width: 90px;
+      margin-left: 6px;
     }
+
     table {
       border-collapse: collapse;
-      margin-top: 16px;
+      margin-top: 20px;
       width: 100%;
     }
+
     th, td {
       border: 1px solid #ccc;
-      padding: 6px 10px;
-      text-align: left;
+      padding: 8px 10px;
     }
+
     th {
-      background: #f2f2f2;
+      background: #f3f3f3;
+    }
+
+    .no-fit {
+      color: #b00020;
+      font-weight: 600;
     }
   </style>
 </head>
+
 <body>
 
-<h2>Cross Stitch Frame Fit</h2>
+<h2>Cross Stitch Frame Fit Calculator</h2>
 
 <label>
   Stitch width:
@@ -42,55 +63,48 @@
   <input id="stitchH" type="number" value="250">
 </label>
 
+<label>
+  Margin (inches per side):
+  <input id="margin" type="number" value="1" step="0.25">
+</label>
+
 <table id="results"></table>
 
 <script>
-const aidaCounts = [14, 16, 18, 20, 22];
+const aidaCounts = [11, 14, 16, 18];
+
+// Standard frame sizes (inches)
 const frames = [
+  [4, 6]
   [5, 7],
   [8, 10],
+  [8.5, 11],
   [11, 14],
   [16, 20]
 ];
 
 function update() {
-  const w = Number(document.getElementById("stitchW").value);
-  const h = Number(document.getElementById("stitchH").value);
+  const stitchW = Number(document.getElementById("stitchW").value);
+  const stitchH = Number(document.getElementById("stitchH").value);
+  const margin = Number(document.getElementById("margin").value);
 
   let html = `
     <tr>
-      <th>Aida</th>
-      <th>Size (inches)</th>
+      <th>Aida Count</th>
+      <th>Stitched Size (in)</th>
+      <th>With Margins (in)</th>
       <th>Fits Frames</th>
     </tr>
   `;
 
   aidaCounts.forEach(count => {
-    const wi = (w / count).toFixed(2);
-    const hi = (h / count).toFixed(2);
+    const stitchedW = stitchW / count;
+    const stitchedH = stitchH / count;
+
+    const totalW = stitchedW + margin * 2;
+    const totalH = stitchedH + margin * 2;
 
     const fits = frames
-      .filter(([fw, fh]) => wi <= fw && hi <= fh)
-      .map(([fw, fh]) => `${fw}×${fh}`)
-      .join(", ") || "❌ None";
-
-    html += `
-      <tr>
-        <td>${count}</td>
-        <td>${wi} × ${hi}</td>
-        <td>${fits}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("results").innerHTML = html;
-}
-
-document.getElementById("stitchW").addEventListener("input", update);
-document.getElementById("stitchH").addEventListener("input", update);
-
-update();
-</script>
-
-</body>
-</html>
+      .filter(([fw, fh]) =>
+        (totalW <= fw && totalH <= fh) ||
+        (totalW <= fh && totalH <= fw) // allo
