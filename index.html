@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cross Stitch Frame Fit</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 24px;
+      max-width: 600px;
+    }
+    input {
+      width: 80px;
+      margin: 0 8px 8px 0;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 16px;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    th {
+      background: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Cross Stitch Frame Fit</h2>
+
+<label>
+  Stitch width:
+  <input id="stitchW" type="number" value="200">
+</label>
+
+<label>
+  Stitch height:
+  <input id="stitchH" type="number" value="250">
+</label>
+
+<table id="results"></table>
+
+<script>
+const aidaCounts = [14, 16, 18, 20, 22];
+const frames = [
+  [5, 7],
+  [8, 10],
+  [11, 14],
+  [16, 20]
+];
+
+function update() {
+  const w = Number(document.getElementById("stitchW").value);
+  const h = Number(document.getElementById("stitchH").value);
+
+  let html = `
+    <tr>
+      <th>Aida</th>
+      <th>Size (inches)</th>
+      <th>Fits Frames</th>
+    </tr>
+  `;
+
+  aidaCounts.forEach(count => {
+    const wi = (w / count).toFixed(2);
+    const hi = (h / count).toFixed(2);
+
+    const fits = frames
+      .filter(([fw, fh]) => wi <= fw && hi <= fh)
+      .map(([fw, fh]) => `${fw}×${fh}`)
+      .join(", ") || "❌ None";
+
+    html += `
+      <tr>
+        <td>${count}</td>
+        <td>${wi} × ${hi}</td>
+        <td>${fits}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("results").innerHTML = html;
+}
+
+document.getElementById("stitchW").addEventListener("input", update);
+document.getElementById("stitchH").addEventListener("input", update);
+
+update();
+</script>
+
+</body>
+</html>
