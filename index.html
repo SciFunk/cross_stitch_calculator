@@ -8,7 +8,7 @@
     body {
       font-family: system-ui, -apple-system, sans-serif;
       padding: 24px;
-      max-width: 720px;
+      max-width: 1000px;
       margin: auto;
     }
 
@@ -32,6 +32,7 @@
     th, td {
       border: 1px solid #ccc;
       padding: 8px 10px;
+      vertical-align: top;
     }
 
     th {
@@ -41,6 +42,15 @@
     .no-fit {
       color: #b00020;
       font-weight: 600;
+    }
+
+    .diagram {
+      margin-bottom: 8px;
+    }
+
+    .frame-label {
+      font-size: 12px;
+      margin-bottom: 2px;
     }
   </style>
 </head>
@@ -70,7 +80,6 @@
 /* ===== CONFIG ===== */
 const aidaCounts = [11, 14, 16, 18];
 
-// Standard frame sizes (inches)
 const frames = [
   [4, 6],
   [5, 7],
@@ -80,6 +89,33 @@ const frames = [
   [16, 20]
 ];
 
+const SVG_SIZE = 120; // pixels for largest dimension
+
+/* ===== HELPERS ===== */
+function makeDiagram(frameW, frameH, stitchW, stitchH) {
+  const scale = SVG_SIZE / Math.max(frameW, frameH);
+
+  const fw = frameW * scale;
+  const fh = frameH * scale;
+  const sw = stitchW * scale;
+  const sh = stitchH * scale;
+
+  const offsetX = (fw - sw) / 2;
+  const offsetY = (fh - sh) / 2;
+
+  return `
+    <div class="diagram">
+      <svg width="${fw}" height="${fh}">
+        <rect x="0" y="0" width="${fw}" height="${fh}"
+              fill="#eee" stroke="#555" />
+        <rect x="${offsetX}" y="${offsetY}"
+              width="${sw}" height="${sh}"
+              fill="#4a90e2" opacity="0.85" />
+      </svg>
+    </div>
+  `;
+}
+
 /* ===== LOGIC ===== */
 function update() {
   const stitchW = Number(document.getElementById("stitchW").value);
@@ -88,10 +124,12 @@ function update() {
 
   let html = `
     <tr>
-      <th>Aida Count</th>
+      <th>Aida</th>
       <th>Stitched Size (in)</th>
       <th>With Margins (in)</th>
       <th>Fits Frames</th>
+      <th>Resulting Margins (per side)</th>
+      <th>Visual</th>
     </tr>
   `;
 
@@ -102,22 +140,43 @@ function update() {
     const totalW = stitchedW + margin * 2;
     const totalH = stitchedH + margin * 2;
 
-    const fits = frames
-      .filter(([fw, fh]) =>
-        (totalW <= fw && totalH <= fh) ||
-        (totalW <= fh && totalH <= fw)
-      )
-      .map(([fw, fh]) => `${fw}×${fh}`)
-      .join(", ");
+    let fits = [];
+    let margins = [];
+    let visuals = [];
+
+    frames.forEach(([fw, fh]) => {
+      let normal = totalW <= fw && totalH <= fh;
+      let rotated = totalW <= fh && totalH <= fw;
+
+      if (normal || rotated) {
+        const frameW = normal ? fw : fh;
+        const frameH = normal ? fh : fw;
+
+        const marginX = (frameW - stitchedW) / 2;
+        const marginY = (frameH - stitchedH) / 2;
+
+        fits.push(`${fw}×${fh}`);
+        margins.push(`${fw}×${fh}: ${marginX.toFixed(2)}″ × ${marginY.toFixed(2)}″`);
+
+        visuals.push(`
+          <div>
+            <div class="frame-label">${fw}×${fh}</div>
+            ${makeDiagram(frameW, frameH, stitchedW, stitchedH)}
+          </div>
+        `);
+      }
+    });
 
     html += `
       <tr>
         <td>${count}</td>
         <td>${stitchedW.toFixed(2)} × ${stitchedH.toFixed(2)}</td>
         <td>${totalW.toFixed(2)} × ${totalH.toFixed(2)}</td>
-        <td class="${fits ? "" : "no-fit"}">
-          ${fits || "❌ None"}
+        <td class="${fits.length ? "" : "no-fit"}">
+          ${fits.join(", ") || "❌ None"}
         </td>
+        <td>${margins.join("<br>") || "—"}</td>
+        <td>${visuals.join("") || "—"}</td>
       </tr>
     `;
   });
@@ -126,9 +185,9 @@ function update() {
 }
 
 /* ===== EVENTS ===== */
-["stitchW", "stitchH", "margin"].forEach(id => {
-  document.getElementById(id).addEventListener("input", update);
-});
+["stitchW", "stitchH", "margin"].forEach(id =>
+  document.getElementById(id).addEventListener("input", update)
+);
 
 update();
 </script>
