@@ -4,69 +4,63 @@
   <meta charset="UTF-8">
   <title>💖 Cross Stitch Frame Fit Calculator for Jen 💖</title>
 
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 24px;
+      max-width: 1000px;
+      margin: auto;
+    }
 
-<style>
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    padding: 24px;
-    max-width: 1000px;
-    margin: auto;
-  }
+    h2 {
+      margin-bottom: 24px;
+    }
 
-  h2 {
-    margin-bottom: 24px; /* extra space below title */
-  }
+    label, input {
+      font-weight: bold;
+    }
 
-  label, input {
-    font-weight: bold; /* make labels and inputs bold */
-  }
+    label {
+      display: inline-block;
+      margin-right: 16px;
+      margin-bottom: 12px;
+    }
 
-  label {
-    display: inline-block;
-    margin-right: 16px;
-    margin-bottom: 12px;
-  }
+    input {
+      width: 90px;
+      margin-left: 6px;
+    }
 
-  input {
-    width: 90px;
-    margin-left: 6px;
-  }
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+      width: 100%;
+    }
 
-  table {
-    border-collapse: collapse;
-    margin-top: 20px;
-    width: 100%;
-  }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 10px;
+      vertical-align: top;
+    }
 
-  th, td {
-    border: 1px solid #ccc;
-    padding: 8px 10px;
-    vertical-align: top;
-  }
+    th {
+      background: #f3f3f3;
+    }
 
-  th {
-    background: #f3f3f3;
-  }
+    .diagram {
+      margin-bottom: 8px;
+    }
 
-  .no-fit {
-    color: #b00020;
-    font-weight: 600;
-  }
+    .frame-label {
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
 
-  .diagram {
-    margin-bottom: 8px;
-  }
-
-  .frame-label {
-    font-size: 12px;
-    margin-bottom: 2px;
-  }
-
-  .aida-count {
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-</style>
+    .aida-count {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+  </style>
 </head>
 
 <body>
@@ -103,7 +97,7 @@ const frames = [
   [16, 20]
 ];
 
-const SVG_SIZE = 120; // pixels for largest dimension
+const SVG_SIZE = 120;
 
 /* ===== HELPERS ===== */
 function makeDiagram(frameW, frameH, stitchW, stitchH) {
@@ -120,11 +114,8 @@ function makeDiagram(frameW, frameH, stitchW, stitchH) {
   return `
     <div class="diagram">
       <svg width="${fw}" height="${fh}">
-        <rect x="0" y="0" width="${fw}" height="${fh}"
-              fill="#eee" stroke="#555" />
-        <rect x="${offsetX}" y="${offsetY}"
-              width="${sw}" height="${sh}"
-              fill="#ff69b4" opacity="0.85" />
+        <rect x="0" y="0" width="${fw}" height="${fh}" fill="#eee" stroke="#555" />
+        <rect x="${offsetX}" y="${offsetY}" width="${sw}" height="${sh}" fill="#ff69b4" opacity="0.85" />
       </svg>
     </div>
   `;
@@ -141,7 +132,6 @@ function update() {
       <th>Aida</th>
       <th>Stitched Size (in)</th>
       <th>With Margins (in)</th>
-      <th>Fits Frames</th>
       <th>Resulting Margins (per side)</th>
       <th>Visual</th>
     </tr>
@@ -154,7 +144,6 @@ function update() {
     const totalW = stitchedW + margin * 2;
     const totalH = stitchedH + margin * 2;
 
-    let fits = [];
     let margins = [];
     let visuals = [];
 
@@ -169,7 +158,6 @@ function update() {
         const marginX = (frameW - stitchedW) / 2;
         const marginY = (frameH - stitchedH) / 2;
 
-        fits.push(`${fw}×${fh}`);
         margins.push(`${fw}×${fh}: ${marginX.toFixed(2)}″ × ${marginY.toFixed(2)}″`);
 
         visuals.push(`
@@ -186,9 +174,6 @@ function update() {
         <td class="aida-count">${count}</td>
         <td>${stitchedW.toFixed(2)} × ${stitchedH.toFixed(2)}</td>
         <td>${totalW.toFixed(2)} × ${totalH.toFixed(2)}</td>
-        <td class="${fits.length ? "" : "no-fit"}">
-          ${fits.join(", ") || "❌ None"}
-        </td>
         <td>${margins.join("<br>") || "—"}</td>
         <td>${visuals.join("") || "—"}</td>
       </tr>
