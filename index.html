@@ -75,13 +75,14 @@ const aidaCounts = [11, 14, 16, 18];
 
 // Standard frame sizes (inches)
 const frames = [
-  [4, 6]
+  [4, 6],
   [5, 7],
   [8, 10],
   [8.5, 11],
   [11, 14],
   [16, 20]
 ];
+</script>
 
 function update() {
   const stitchW = Number(document.getElementById("stitchW").value);
@@ -107,4 +108,35 @@ function update() {
     const fits = frames
       .filter(([fw, fh]) =>
         (totalW <= fw && totalH <= fh) ||
-        (totalW <= fh && totalH <= fw) // allo
+        (totalW <= fh && totalH <= fw) // allow rotation
+      )
+      .map(([fw, fh]) => `${fw}×${fh}`)
+      .join(", ");
+
+    html += `
+      <tr>
+        <td>${count}</td>
+        <td>${stitchedW.toFixed(2)} × ${stitchedH.toFixed(2)}</td>
+        <td>${totalW.toFixed(2)} × ${totalH.toFixed(2)}</td>
+        <td class="${fits ? "" : "no-fit"}">
+          ${fits || "❌ None"}
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("results").innerHTML = html;
+}
+
+// Live updates
+["stitchW", "stitchH", "margin"].forEach(id => {
+  document.getElementById(id).addEventListener("input", update);
+});
+
+// Initial render
+update();
+</script>
+
+</body>
+</html>
+
