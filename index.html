@@ -10,10 +10,14 @@
       padding: 24px;
       max-width: 1000px;
       margin: auto;
+      position: relative;
+      overflow: hidden;
     }
 
     h2 {
       margin-bottom: 24px;
+      position: relative;
+      display: inline-block;
     }
 
     label, input {
@@ -60,12 +64,28 @@
       font-weight: bold;
       font-size: 1.2em;
     }
+
+    /* Sparkle animation for header stars */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    .sparkle-star {
+      position: absolute;
+      font-size: 14px;
+      pointer-events: none;
+      animation-name: twinkle;
+      animation-duration: 1.5s;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
   </style>
 </head>
 
 <body>
 
-<h2>💖✨ Cross Stitch Frame Fit Calculator for Jen ✨💖</h2>
+<h2 id="header-text">💖✨ Cross Stitch Frame Fit Calculator for Jen ✨💖</h2>
 
 <label>
   Stitch width:
@@ -111,8 +131,8 @@ function makeDiagram(frameW, frameH, stitchW, stitchH) {
   const offsetX = (fw - sw) / 2;
   const offsetY = (fh - sh) / 2;
 
-  const marginX = ((fw / scale) - stitchW) / 2; // horizontal margin in inches
-  const marginY = ((fh / scale) - stitchH) / 2; // vertical margin in inches
+  const marginX = ((fw / scale) - stitchW) / 2;
+  const marginY = ((fh / scale) - stitchH) / 2;
 
   return `
     <div class="diagram">
@@ -202,6 +222,33 @@ function update() {
 );
 
 update();
+
+/* ===== SPARKLING STARS ===== */
+function createSparkles() {
+  const header = document.getElementById('header-text');
+  const numStars = 15; // number of twinkle stars
+
+  for (let i = 0; i < numStars; i++) {
+    const star = document.createElement('span');
+    star.className = 'sparkle-star';
+    star.textContent = '✨';
+
+    // random position around the header
+    const rect = header.getBoundingClientRect();
+    const x = Math.random() * rect.width - 10;
+    const y = Math.random() * rect.height - 10;
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
+
+    // random animation delay
+    star.style.animationDelay = `${Math.random() * 2}s`;
+
+    document.body.appendChild(star);
+  }
+}
+
+// wait a tiny moment for header to render
+window.addEventListener('load', createSparkles);
 </script>
 
 </body>
