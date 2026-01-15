@@ -12,10 +12,6 @@
       margin: auto;
     }
 
-    h2 {
-      margin-bottom: 12px;
-    }
-
     label {
       display: inline-block;
       margin-right: 16px;
@@ -71,6 +67,7 @@
 <table id="results"></table>
 
 <script>
+/* ===== CONFIG ===== */
 const aidaCounts = [11, 14, 16, 18];
 
 // Standard frame sizes (inches)
@@ -83,6 +80,7 @@ const frames = [
   [16, 20]
 ];
 
+/* ===== LOGIC ===== */
 function update() {
   const stitchW = Number(document.getElementById("stitchW").value);
   const stitchH = Number(document.getElementById("stitchH").value);
@@ -107,7 +105,7 @@ function update() {
     const fits = frames
       .filter(([fw, fh]) =>
         (totalW <= fw && totalH <= fh) ||
-        (totalW <= fh && totalH <= fw) // allow rotation
+        (totalW <= fh && totalH <= fw)
       )
       .map(([fw, fh]) => `${fw}×${fh}`)
       .join(", ");
@@ -127,15 +125,13 @@ function update() {
   document.getElementById("results").innerHTML = html;
 }
 
-// Live updates
+/* ===== EVENTS ===== */
 ["stitchW", "stitchH", "margin"].forEach(id => {
   document.getElementById(id).addEventListener("input", update);
 });
 
-// Initial render
 update();
 </script>
 
 </body>
 </html>
-
