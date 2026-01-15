@@ -52,6 +52,12 @@
       font-size: 12px;
       margin-bottom: 2px;
     }
+
+    /* Make the aida count bigger and bold */
+    .aida-count {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 
@@ -110,7 +116,7 @@ function makeDiagram(frameW, frameH, stitchW, stitchH) {
               fill="#eee" stroke="#555" />
         <rect x="${offsetX}" y="${offsetY}"
               width="${sw}" height="${sh}"
-              fill="#4a90e2" opacity="0.85" />
+              fill="#ff69b4" opacity="0.85" />
       </svg>
     </div>
   `;
@@ -169,7 +175,7 @@ function update() {
 
     html += `
       <tr>
-        <td>${count}</td>
+        <td class="aida-count">${count}</td>
         <td>${stitchedW.toFixed(2)} × ${stitchedH.toFixed(2)}</td>
         <td>${totalW.toFixed(2)} × ${totalH.toFixed(2)}</td>
         <td class="${fits.length ? "" : "no-fit"}">
