@@ -11,36 +11,68 @@
       max-width: 1000px;
       margin: auto;
       position: relative;
-      overflow-y: auto;   /* 👈 enable vertical scrolling */
       overflow-x: hidden;
+      overflow-y: auto;
+      background: radial-gradient(circle at top, #fff0f8, #ffffff 60%);
     }
 
+    /* ===== Sticky header + inputs ===== */
+    .sticky-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 240, 248, 0.96);
+      backdrop-filter: blur(6px);
+      padding: 16px 0 12px;
+      border-bottom: 1px solid #f2cfe1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
 
     h2 {
-      margin-bottom: 32px; /* more space before the input boxes */
+      margin: 0;
       position: relative;
       display: block;
     }
 
-    label, input {
-      font-weight: bold;
+    /* Inputs in a single row */
+    .inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+      align-items: end;
     }
 
     label {
-      display: inline-block;
-      margin-right: 16px;
-      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      gap: 8px;
     }
 
     input {
-      width: 90px;
-      margin-left: 6px;
+      width: 80px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+      font-weight: bold;
+    }
+
+    /* ===== Results area ===== */
+    .results-wrapper {
+      max-height: 65vh;
+      overflow-y: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      scroll-margin-top: 160px;
     }
 
     table {
       border-collapse: collapse;
-      margin-top: 20px;
       width: 100%;
+      background: white;
     }
 
     th, td {
@@ -51,23 +83,41 @@
 
     th {
       background: #f3f3f3;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody tr:hover {
+      background-color: #fff6fb;
+      transition: background-color 0.2s ease;
+    }
+
+    .aida-count {
+      font-weight: bold;
+      font-size: 1.3em;
+      background: linear-gradient(135deg, #ffe0ef, #fff);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: inline-block;
     }
 
     .diagram {
       margin-bottom: 8px;
     }
 
+    .diagram svg {
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
     .frame-label {
       font-size: 12px;
       margin-bottom: 2px;
+      text-align: center;
     }
 
-    .aida-count {
-      font-weight: bold;
-      font-size: 1.2em;
-    }
-
-    /* Sparkle animation for header stars */
+    /* ===== Sparkles ===== */
     @keyframes twinkle {
       0%, 100% { opacity: 0.3; transform: scale(1); }
       50% { opacity: 1; transform: scale(1.5); }
@@ -77,10 +127,7 @@
       position: absolute;
       font-size: 14px;
       pointer-events: none;
-      animation-name: twinkle;
-      animation-duration: 1.5s;
-      animation-iteration-count: infinite;
-      animation-timing-function: ease-in-out;
+      animation: twinkle 1.5s ease-in-out infinite;
     }
   </style>
 </head>
@@ -92,23 +139,25 @@
 
   <div class="inputs">
     <label>
-      Stitch width:
+      Stitch width
       <input id="stitchW" type="number" value="200">
     </label>
 
     <label>
-      Stitch height:
+      Stitch height
       <input id="stitchH" type="number" value="250">
     </label>
 
     <label>
-      Minimum Margin (inches per side):
+      Margin (in / side)
       <input id="margin" type="number" value="1" step="0.25">
     </label>
   </div>
 </div>
 
-<table id="results"></table>
+<div class="results-wrapper">
+  <table id="results"></table>
+</div>
 
 <script>
 /* ===== CONFIG ===== */
@@ -143,15 +192,11 @@ function makeDiagram(frameW, frameH, stitchW, stitchH) {
   return `
     <div class="diagram">
       <svg width="${fw}" height="${fh}">
-        <!-- Frame -->
         <rect x="0" y="0" width="${fw}" height="${fh}" fill="#eee" stroke="#555" />
-        <!-- Stitched area -->
         <rect x="${offsetX}" y="${offsetY}" width="${sw}" height="${sh}" fill="#ff69b4" opacity="0.85" />
-        <!-- Horizontal margin at bottom -->
         <text x="${fw / 2}" y="${fh - 2}" font-size="10" text-anchor="middle" fill="#333">
           ${marginX.toFixed(1)}"
         </text>
-        <!-- Vertical margin on right -->
         <text x="${fw - 2}" y="${fh / 2}" font-size="10" text-anchor="end" dominant-baseline="middle" fill="#333">
           ${marginY.toFixed(1)}"
         </text>
@@ -179,7 +224,6 @@ function update() {
   aidaCounts.forEach(count => {
     const stitchedW = stitchW / count;
     const stitchedH = stitchH / count;
-
     const totalW = stitchedW + margin * 2;
     const totalH = stitchedH + margin * 2;
 
@@ -187,8 +231,8 @@ function update() {
     let visuals = [];
 
     frames.forEach(([fw, fh]) => {
-      let normal = totalW <= fw && totalH <= fh;
-      let rotated = totalW <= fh && totalH <= fw;
+      const normal = totalW <= fw && totalH <= fh;
+      const rotated = totalW <= fh && totalH <= fw;
 
       if (normal || rotated) {
         const frameW = normal ? fw : fh;
@@ -198,7 +242,6 @@ function update() {
         const marginY = (frameH - stitchedH) / 2;
 
         margins.push(`${fw}×${fh}: ${marginX.toFixed(2)}″ × ${marginY.toFixed(2)}″`);
-
         visuals.push(`
           <div>
             <div class="frame-label">${fw}×${fh}</div>
@@ -210,7 +253,7 @@ function update() {
 
     html += `
       <tr>
-        <td class="aida-count">${count}</td>
+        <td><span class="aida-count">${count}</span></td>
         <td>${stitchedW.toFixed(2)} × ${stitchedH.toFixed(2)}</td>
         <td>${totalW.toFixed(2)} × ${totalH.toFixed(2)}</td>
         <td>${margins.join("<br>") || "—"}</td>
@@ -229,31 +272,22 @@ function update() {
 
 update();
 
-/* ===== SPARKLING STARS ===== */
+/* ===== SPARKLES ===== */
 function createSparkles() {
   const header = document.getElementById('header-text');
-  const numStars = 15; // number of twinkle stars
+  const rect = header.getBoundingClientRect();
 
-  for (let i = 0; i < numStars; i++) {
+  for (let i = 0; i < 15; i++) {
     const star = document.createElement('span');
     star.className = 'sparkle-star';
     star.textContent = '✨';
-
-    // random position around the header
-    const rect = header.getBoundingClientRect();
-    const x = Math.random() * rect.width - 10;
-    const y = Math.random() * rect.height - 10;
-    star.style.left = `${x}px`;
-    star.style.top = `${y}px`;
-
-    // random animation delay
+    star.style.left = `${rect.left + Math.random() * rect.width}px`;
+    star.style.top = `${rect.top + Math.random() * rect.height}px`;
     star.style.animationDelay = `${Math.random() * 2}s`;
-
     document.body.appendChild(star);
   }
 }
 
-// wait a tiny moment for header to render
 window.addEventListener('load', createSparkles);
 </script>
 
